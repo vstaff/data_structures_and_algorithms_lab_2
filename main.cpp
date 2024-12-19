@@ -105,7 +105,7 @@ private:
 		return leftChild;
 	}
 
-	Node* leftRotate(Node* node)
+	Node* rotateLeft(Node* node)
 	{
 		Node* rightChild = node->right;
 		Node* rightChildLeftGrandchild = rightChild->left;
@@ -114,13 +114,59 @@ private:
 		node->right = rightChildLeftGrandchild;
 
 		// Update heights
-		node->height
-			= max(getHeight(node->left), getHeight(node->right)) + 1;
-		rightChild->height
-			= max(getHeight(rightChild->left), getHeight(rightChild->right)) + 1;
+		node->height = max(getHeight(node->left), getHeight(node->right)) + 1;
+		rightChild->height = max(getHeight(rightChild->left), getHeight(rightChild->right)) + 1;
 
 		// Return new root
 		return rightChild;
+	}
+
+	Node* insert(Node* node, Group key) {
+		if (node == nullptr) {
+			return new Node(key);
+		}
+
+		if (compare(key, node->key) == -1) {
+			node->left = insert(node->left, key);
+		}
+		else if (compare(key, node->key) == 1) {
+			node->right = insert(node->right, key);
+		}
+		else {
+			return node;
+		}
+
+		// most likely i need to cut the code below
+		// and past it in new method for balancing 
+		node->height = 1 + max(getHeight(node->left), getHeight(node->right));
+
+		// Get the balance factor of this ancestor node
+		int balance = getBalance(node);
+
+		// If this node becomes unbalanced, then there are 4
+		// cases
+
+		// Left Left Case
+		if (balance > 1 && compare(key, node->left->key) == -1)
+			return rotateRight(node);
+
+		// Right Right Case
+		if (balance < -1 && compare(key, node->right->key) == 1)
+			return rotateLeft(node);
+
+		// Left Right Case
+		if (balance > 1 && compare(key, node->left->key) == 1) {
+			node->left = rotateLeft(node->left);
+			return rotateRight(node);
+		}
+
+		// Right Left Case
+		if (balance < -1 && compare(key, node->right->key) == -1) {
+			node->right = rotateRight(node->right);
+			return rotateLeft(node);
+		}
+
+		return node;
 	}
 
 };
