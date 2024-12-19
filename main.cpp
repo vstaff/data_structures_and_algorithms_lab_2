@@ -24,7 +24,7 @@ public:
 	}
 
 	Group(Degree p_degree, int unsigned p_number[4]) {
-		degree = degree;
+		degree = p_degree;
 		
 		for (int i = 0; i < 4; ++i) {
 			number[i] = p_number[i];
@@ -59,3 +59,68 @@ int compare(Group g1, Group g2) {
 
 	return 0;
 }
+
+// node of the tree
+struct Node {
+public:
+	Group key;
+	Node* left;
+	Node* right;
+	int height;
+
+	Node(Group p_key) {
+		key = p_key;
+		left = nullptr;
+		right = nullptr;
+		height = 1;
+	}
+};
+
+class AVLTree {
+private:
+	Node* root;
+
+	// height of the subtree which root is node 
+	int getHeight(Node* node) {
+		return node == nullptr ? 0 : node->height;
+	}
+
+	int getBalance(Node* node) {
+		return node == nullptr ? 0 : getHeight(node->left) - getHeight(node->right);
+	}
+
+	Node* rotateRight(Node* node) {
+		Node* leftChild = node->left;
+		Node* leftChildRightGrandchild = leftChild->right;
+
+		// Perform rotation
+		leftChild->right = node;
+		node->left = leftChildRightGrandchild;
+
+		// Update heights
+		node->height = max(getHeight(node->left), getHeight(node->right)) + 1;
+		leftChild->height = max(getHeight(leftChild->left), getHeight(leftChild->right)) + 1;
+
+		// Return new root
+		return leftChild;
+	}
+
+	Node* leftRotate(Node* node)
+	{
+		Node* rightChild = node->right;
+		Node* rightChildLeftGrandchild = rightChild->left;
+
+		rightChild->left = node;
+		node->right = rightChildLeftGrandchild;
+
+		// Update heights
+		node->height
+			= max(getHeight(node->left), getHeight(node->right)) + 1;
+		rightChild->height
+			= max(getHeight(rightChild->left), getHeight(rightChild->right)) + 1;
+
+		// Return new root
+		return rightChild;
+	}
+
+};
