@@ -169,4 +169,8 @@ private:
 		return node;
 	}
 
+	// balancing tree after node inserting 
+	Node* balance(Node* node) {
+
+	}
 };
