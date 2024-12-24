@@ -1,476 +1,361 @@
 #include <iostream>
 #include <fstream>
-//#include <string>
-#include <locale.h>
+#include <string>
 #include <regex>
-
 using namespace std;
 
-// node key field 1 - degree
+// степень образования
 enum Degree {
-	B, 
-	M, 
-	S,
-	N, // not stated 
+    B, // бакалавриат
+    M, // магистратура 
+    S, // специалитет
+    N, // не указано
 };
 
-// node key
+//// чтобы понятно отображались ключи 
+//std::ostream& operator << (std::ostream& os, const Degree& degree) {
+//    switch (degree) {
+//    case B:
+//        return os << "B";
+//    case M:
+//        return os << "M";
+//    case S:
+//        return os << "S";
+//    }
+//}
+
+// код группы
 struct Group {
 public:
-	// group contains degree and 4-digits number
-	Degree degree;
-	int unsigned number[4];
+    Degree degree; // степень образования 
+    unsigned int number[4]; // четырехзначный код образовательной программы
 
-	Group() {
-		degree = N;
-		for (int i = 0; i < 4; ++i) {
-			number[i] = 0;
-		}
-	}
+    Group() {
+        degree = N;
+        for (int i = 0; i < 4; ++i) {
+            number[i] = 0;
+        }
+    }
 
-	Group(Degree p_degree, int p_number[4]) {
-		degree = p_degree;
-		
-		for (int i = 0; i < 4; ++i) {
-			number[i] = p_number[i];
-		}
-	}
+    Group(Degree p_degree, unsigned int p_number[4]) {
+        degree = p_degree;
+
+        for (int i = 0; i < 4; ++i) {
+            number[i] = p_number[i];
+        }
+    }
 };
 
-// compares two groups and returns:
-// 1 if first group is greater than second one 
-// 0 if first group and second one are equal
-// -1 if first group is less than second one
+// для сравнения ключей
 int compare(Group g1, Group g2) {
-	if (g1.degree == N || g2.degree == N) {
-		throw "degree is not stated";
-	}
+    if (g1.degree == N || g2.degree == N) {
+        throw "degree is not stated";
+    }
 
-	int g1Degree = g1.degree;
-	int g2Degree = g2.degree;
+    if (g1.degree != g2.degree) {
+        return (g1.degree > g2.degree) ? 1 : -1;
+    }
 
-	if (g1Degree != g2Degree) {
-		return (g1Degree > g2Degree) ? 1 : -1;
-	}
+    for (int i = 0; i < 4; ++i) {
+        if (g1.number[i] > g2.number[i]) {
+            return 1;
+        }
+        else if (g1.number[i] < g2.number[i]) {
+            return -1;
+        }
+    }
 
-	for (int i = 0; i < 4; ++i) {
-		if (g1.number[i] > g2.number[i]) {
-			return 1;
-		}
-		else if (g1.number[i] < g2.number[i]) {
-			return -1;
-		}
-	}
-
-	return 0;
+    return 0;
 }
 
-// node of the tree
+// узел дерева
 struct Node {
 public:
-	Group key;
-	Node* left;
-	Node* right;
-	int height;
+    Group key;
+    Node* left;
+    Node* right;
+    int height;
 
-	Node(Group p_key) {
-		key = p_key;
-		left = nullptr;
-		right = nullptr;
-		height = 1;
-	}
+    Node(Group p_key) {
+        key = p_key;
+        left = nullptr;
+        right = nullptr;
+        height = 1;
+    }
 };
 
+// чтобы понятно отображались ключи 
 std::ostream& operator << (std::ostream& os, const Node& node) {
-	char degree;
+    char degree = 'N';
+    
+    switch (node.key.degree) {
+    case B:
+        degree = 'B';
+    case M:
+        degree = 'M';
+    case S:
+        degree = 'S';
+    }
 
-	switch (node.key.degree) {
-	case B:
-		degree = 'B';
-		break;
-	case M:
-		degree = 'M';
-		break;
-	case S:
-		degree = 'S';
-		break;
-	}
+    string number = "";
 
-	string number;
+    for (int i = 0; i < 4; ++i) {
+        number += std::to_string(node.key.number[i]);
+    }
 
-	for (int i = 0; i < 4; ++i) {
-		number += std::to_string(node.key.number[i]);
-	}
-
-	return os << degree << number;
+    return os << degree + number;
 }
 
+// само дерево
 class AVLTree {
 private:
-	Node* root;
+    Node* root;
 
-	// height of the subtree which root is node 
-	int getHeight(Node* node) {
-		return node == nullptr ? 0 : node->height;
-	}
+    int getHeight(Node* node) {
+        return node == nullptr ? 0 : node->height;
+    }
 
-	int getBalance(Node* node) {
-		return node == nullptr ? 0 : getHeight(node->left) - getHeight(node->right);
-	}
+    int getBalance(Node* node) {
+        return node == nullptr ? 0 : getHeight(node->left) - getHeight(node->right);
+    }
 
-	void fixHeight(Node* &node) {
-		int leftChildHeight = getHeight(node->left);
-		int rightChildHeight = getHeight(node->right);
-		node->height = max(leftChildHeight, rightChildHeight) + 1;
-	}
+    Node* rotateRight(Node* y) {
+        Node* x = y->left;
+        Node* T2 = x->right;
 
-	// right rotation
-	Node* rotateRight(Node* &p) {
-		Node* q = p->left;
-		p->left = q->right;
-		q->right = p;
-		fixHeight(p);
-		fixHeight(q);
-		return q;
-	}
+        x->right = y;
+        y->left = T2;
 
-	// left rotation 
-	Node* rotateLeft(Node* &q) {
-		Node* p = q->right;
-		q->right = p->left;
-		p->left = q;
-		fixHeight(q);
-		fixHeight(p);
-		return p;
-	}
+        y->height = max(getHeight(y->left), getHeight(y->right)) + 1;
+        x->height = max(getHeight(x->left), getHeight(x->right)) + 1;
 
-	Node* balance(Node* &p)  {
-		fixHeight(p);
+        return x;
+    }
 
-		if (getBalance(p) == 2) {
-			if (getBalance(p->right) < 0) {
-				p->right = rotateLeft(p->right);
-			}
-			return rotateRight(p);
-		}
+    Node* rotateLeft(Node* x) {
+        Node* y = x->right;
+        Node* T2 = y->left;
 
-		if (getBalance(p) == -2) {
-			if (getBalance(p->left) > 0) {
-				p->left = rotateRight(p->left);
-			}
-			return rotateLeft(p);
-		}
+        y->left = x;
+        x->right = T2;
 
-		return p;
-	}
+        x->height = max(getHeight(x->left), getHeight(x->right)) + 1;
+        y->height = max(getHeight(y->left), getHeight(y->right)) + 1;
 
-	Node* insert(Node* &p, const Group k) {
-		if (p == nullptr) {
-			return new Node(k);
-		}
+        return y;
+    }
 
-		if (compare(k, p->key) == -1) {
-			p->left = insert(p->left, k);
-		}
+    // рекурсивный метод для вставки в дерево
+    // в конечном счете возвращает корень дерева с обновленными вершинами
+    Node* insert(Node* node, Group key) {
+        // если дерево пустое просто добавляем элемент в качестве корня 
+        if (node == nullptr) 
+            return new Node(key);
 
-		else {
-			p->right = insert(p->right, k);
-		}
+        // иначе необходимо найти куда его нужно вставить в дерево
+        int comp = compare(key, node->key);
+        if (comp < 0)
+            // если добавляемый элемент меньше текущего узла - переходим в левое поддерево
+            node->left = insert(node->left, key);
+        else if (comp > 0)
+            // если добавляемый элемент больше текущего узла - переходим в правое поддерево
+            node->right = insert(node->right, key);
+        else
+            return node;
 
-		return balance(p);
-	}
+        // после добавление, у вышестоящих вершин высота увеличивается на один
+        node->height = 1 + max(getHeight(node->left), getHeight(node->right));
 
-	Node* getMin(Node* &p) {
-		return p->left != nullptr ? getMin(p->left) : p;
-	}
+        // необходимо выполнить балансировку дерева 
+        int balance = getBalance(node);
 
-	Node* removeMin(Node* &p) {
-		if (p->left == nullptr) {
-			return p->right;
-		}
+        if (balance > 1 && compare(key, node->left->key) < 0)
+            return rotateRight(node);
 
-		p->left = removeMin(p->left);
-		return balance(p);
-	}
+        if (balance < -1 && compare(key, node->right->key) > 0)
+            return rotateLeft(node);
 
-	Node* remove(Node* &p, Group k) // удаление ключа k из дерева p
-	{
-		if (p == nullptr) {
-			return nullptr;
-		}
+        if (balance > 1 && compare(key, node->left->key) > 0) {
+            node->left = rotateLeft(node->left);
+            return rotateRight(node);
+        }
 
-		if (compare(k, p->key) == -1) {
-			p->left = remove(p->left, k);
-		}
-		else if (compare(k, p->key) == 1) {
-			p->right = remove(p->right, k);
-		}
+        if (balance < -1 && compare(key, node->right->key) < 0) {
+            node->right = rotateRight(node->right);
+            return rotateLeft(node);
+        }
 
+        return node;
+    }
 
-		else {
-			Node* q = p->left;
-			Node* r = p->right;
-			delete p;
-			if (!r) return q;
-			Node* min = getMin(r);
-			min->right = removeMin(r);
-			min->left = q;
-			return balance(min);
-		}
+    // для нахождения минимального элемента 
+    Node* minValueNode(Node* node) {
+        Node* current = node;
 
-		return balance(p);
-	}
+        while (current->left != nullptr)
+            current = current->left;
 
-	// it may be incorrect 
-	//Node* rotateRight(Node* node) {
-	//	Node* leftChild = node->left;
-	//	Node* leftChildRightGrandchild = leftChild->right;
+        return current;
+    }
 
-	//	// Perform rotation
-	//	leftChild->right = node;
-	//	node->left = leftChildRightGrandchild;
+    Node* deleteNode(Node* root, Group key) {
+        if (root == nullptr)
+            return root;
 
-	//	// Update heights
-	//	node->height = max(getHeight(node->left), getHeight(node->right)) + 1;
-	//	leftChild->height = max(getHeight(leftChild->left), getHeight(leftChild->right)) + 1;
+        int comp = compare(key, root->key);
+        if (comp < 0)
+            root->left = deleteNode(root->left, key);
+        else if (comp > 0)
+            root->right = deleteNode(root->right, key);
+        else {
+            if ((root->left == nullptr) || (root->right == nullptr)) {
+                Node* temp = root->left ? root->left : root->right;
 
-	//	// Return new root
-	//	return leftChild;
-	//}
+                if (temp == nullptr) {
+                    temp = root;
+                    root = nullptr;
+                }
+                else
+                    *root = *temp;
 
-	//Node* rotateLeft(Node* node)
-	//{
-	//	Node* rightChild = node->right;
-	//	Node* rightChildLeftGrandchild = rightChild->left;
+                delete temp;
+            }
+            else {
+                Node* temp = minValueNode(root->right);
+                root->key = temp->key;
+                root->right = deleteNode(root->right, temp->key);
+            }
+        }
 
-	//	rightChild->left = node;
-	//	node->right = rightChildLeftGrandchild;
+        if (root == nullptr)
+            return root;
 
-	//	// Update heights
-	//	node->height = max(getHeight(node->left), getHeight(node->right)) + 1;
-	//	rightChild->height = max(getHeight(rightChild->left), getHeight(rightChild->right)) + 1;
+        root->height = 1 + max(getHeight(root->left), getHeight(root->right));
 
-	//	// Return new root
-	//	return rightChild;
-	//}
+        int balance = getBalance(root);
 
-	//Node* insert(Node* node, Group key) {
-	//	if (node == nullptr) {
-	//		return new Node(key);
-	//	}
+        if (balance > 1 && getBalance(root->left) >= 0)
+            return rotateRight(root);
 
-	//	if (compare(key, node->key) == -1) {
-	//		node->left = insert(node->left, key);
-	//	}
-	//	else if (compare(key, node->key) == 1) {
-	//		node->right = insert(node->right, key);
-	//	}
-	//	else {
-	//		return node;
-	//	}
+        if (balance > 1 && getBalance(root->left) < 0) {
+            root->left = rotateLeft(root->left);
+            return rotateRight(root);
+        }
 
-	//	// most likely i need to cut the code below
-	//	// and past it in new method for balancing 
-	//	node->height = 1 + max(getHeight(node->left), getHeight(node->right));
+        if (balance < -1 && getBalance(root->right) <= 0)
+            return rotateLeft(root);
 
-	//	// Get the balance factor of this ancestor node
-	//	int balance = getBalance(node);
+        if (balance < -1 && getBalance(root->right) > 0) {
+            root->right = rotateRight(root->right);
+            return rotateLeft(root);
+        }
 
-	//	// If this node becomes unbalanced, then there are 4
-	//	// cases
+        return root;
+    }
 
-	//	// Left Left Case
-	//	if (balance > 1 && compare(key, node->left->key) == -1)
-	//		return rotateRight(node);
+    void inOrder(Node* root) {
+        if (root != nullptr) {
+            inOrder(root->right);
+            cout << root->key << endl;
+            inOrder(root->left);
+        }
+    }
 
-	//	// Right Right Case
-	//	if (balance < -1 && compare(key, node->right->key) == 1)
-	//		return rotateLeft(node);
-
-	//	// Left Right Case
-	//	if (balance > 1 && compare(key, node->left->key) == 1) {
-	//		node->left = rotateLeft(node->left);
-	//		return rotateRight(node);
-	//	}
-
-	//	// Right Left Case
-	//	if (balance < -1 && compare(key, node->right->key) == -1) {
-	//		node->right = rotateRight(node->right);
-	//		return rotateLeft(node);
-	//	}
-
-	//	return node;
-	//}
-
-	//// balancing tree after node inserting 
-	//Node* balance(Node* node) {
-
-	//}
-
-	// центрированный 
-	Node* LNR(Node* node) {
-		if (node == nullptr) {
-			return nullptr;
-		}
-
-		LNR(node->left);
-		cout << *node << endl;
-		LNR(node->right);
-	}
-
-	// прямой 
-	Node* NLR(Node* node) {
-		if (node == nullptr) {
-			return nullptr;
-		}
-
-		cout << *node;
-		NLR(node->left);
-		NLR(node->right);
-	}
-
-	// обратный 
-	Node* LRN(Node* node) {
-		if (node == nullptr) {
-			return nullptr;
-		}
-
-		LRN(node->left);
-		LRN(node->right);
-		cout << *node;
-	}
+    void freeMemory(Node* root) {
+        if (root != nullptr) {
+            freeMemory(root->left);
+            freeMemory(root->right);
+            delete root;
+        }
+    }
 
 public:
-	AVLTree() {
-		root = nullptr;
-	}
+    AVLTree() {
+        root = nullptr;
+    }
 
-	void insert(Group key) {
-		root = insert(root, key);
-	}
+    void insert(Group key) {
+        root = insert(root, key);
+    }
 
-	void remove(Group key) {
-		remove(root, key);
-	}
+    void deleteKey(Group key) {
+        root = deleteNode(root, key);
+    }
 
-	void LNR() {
-		LNR(root);
-	}
+    void search(Group key) {
+        Node* current = root;
+        while (current != nullptr) {
+            int comp = compare(key, current->key);
+            if (comp == 0) {
+                cout << "Found: ";
+                cout << current;
+                return;
+            }
+            current = (comp < 0) ? current->left : current->right;
+        }
+        cout << "Not Found" << endl;
+    }
 
-	void NLR() {
-		NLR(root);
-	}
+    void traverse() {
+        inOrder(root);
+    }
 
-	void LRN() {
-		LRN(root);
-	}
+    ~AVLTree() {
+        freeMemory(root);
+    }
 };
 
-// method for validating input data in text file
-bool validateInput(string fileName) {
-	std::ifstream file(fileName);
-	string line;
+bool isKeyValid(string key) {
+    const regex pattern("[BMS]\\d{4}");
 
-	if (file.is_open()) {
-		while (std::getline(file, line)) {
-			if (line.length() != 5) {
-				cout << "каждый ключ должен состоять из 5 символов";
-				file.close();
-				return false;
-			}
-
-			char degree = line.at(0);
-			string number = line.substr(1);
-
-			if (degree != 'B' && degree != 'M' && degree != 'S') {
-				cout << "первый символ ключа должен быть одной из перечисленных букв: B, M, S\n";
-				file.close();
-				return false;
-				
-			}
-
-			for (int i = 0; i < 4; ++i) {
-				if (!isdigit(number[i])) {
-					cout << "последующие после первого символы ключа должны быть цифрами\n";
-					file.close();
-					return false;
-				}
-			}
-
-			cout << degree << ':' << number[0] << number[1] << number[2] << number[3] << endl;
-		}
-	}
-	else {
-		cout << "нет файла с именем: " + fileName;
-		return false;
-	}
-
-	file.close();
-	return true;
-}
-
-bool validateKey(string key) {
-	const regex pattern("[BMS]\\d{4}");
-	
-	return regex_match(key, pattern);
-}
-
-std::vector<int> getDigits(string str_digits) {
-	vector<int> digits;
-
-	for (char character : str_digits) {
-		digits.push_back(character - '0');
-	}
-
-	return digits;
+    return regex_match(key, pattern);
 }
 
 int main() {
-	setlocale(LC_ALL, "Russian");
+    std::ifstream file("./input.txt");
+    AVLTree tree;
 
-	AVLTree tree;
+    if (!file.is_open()) {
+        cout << "there is no file with such name\n";
+        return 0;
+    }
 
-	std::ifstream file("./input.txt");
-	string line;
+    string line;
 
-	if (!file.is_open()) {
-		cout << "нет файла с таким именем";
-		return 0;
-	}
+    while (std::getline(file, line)) {
+        if (!isKeyValid(line)) {
+            continue;
+        }
 
-	while (std::getline(file, line)) {
-		if (!validateKey(line)) {
-			cout << "некорректный ключ";
-			return 0;
-		}
+        Degree degree = N;
 
-		char degree = line.at(0);
-		Degree groupDegree;
+        switch (line.at(0)) {
+        case 'B':
+            degree = B;
+            break;
+        case 'M':
+            degree = M;
+            break;
+        case 'S':
+            degree = S;
+            break;
+        }
 
-		switch (degree) {
-		case 'B':
-			groupDegree = B;
-			break;
-		
-		case 'M':
-			groupDegree = M;
-			break; 
+        //cout << degree;
 
-		case 'S':
-			groupDegree = S;
-			break;
-		}
+        int unsigned number[4] = { 0, 0, 0, 0, };
 
-		string number = line.substr(1);
-		int groupNumber[4];
+        for (int i = 0; i < 4; ++i) {
+            number[i] = line.substr(1).at(i) - '0';
+            //cout << number[i];
+        }
 
-		for (int i = 0; i < 4; ++i) {
-			groupNumber[i] = number[i] - '0';
-		}
+        //cout << "\n";
 
+        Group key(degree, number);
+        tree.insert(key);
+    }
 
-		Group key = Group(groupDegree, groupNumber);
-
-		tree.insert(key);
-	}
+    tree.traverse();
+    file.close();
 }
