@@ -140,11 +140,12 @@ Node* AVLTree::insert(Node* node, Group key, int rowIndex) {
     else if (comp > 0)
         // if new element is greater than current node then recursively insert in the right subtree
         node->right = insert(node->right, key, rowIndex);
-    else
+    else {
         // if we key is a complete copy of the current node 
         node->addDuplicate(rowIndex);
         return node;
-
+    }
+        
     // after inserting all the nodes above the new one increase their height by 1
     node->height = 1 + std::max(getHeight(node->left), getHeight(node->right));
 
