@@ -4,12 +4,12 @@
 #include <regex>
 using namespace std;
 
-// степень образования
+// education degree
 enum Degree {
-    B, // бакалавриат
-    M, // магистратура 
-    S, // специалитет
-    N, // не указано
+    B, // bakalavriat
+    M, // magistratura
+    S, // specialitet
+    N, // not stated 
 };
 
 //// чтобы понятно отображались ключи 
@@ -24,11 +24,11 @@ enum Degree {
 //    }
 //}
 
-// код группы
+// group code 
 struct Group {
 public:
-    Degree degree; // степень образования 
-    unsigned int number[4]; // четырехзначный код образовательной программы
+    Degree degree; // education degree
+    unsigned int number[4]; // 4-digit code of education programm
 
     Group() {
         degree = N;
@@ -46,7 +46,7 @@ public:
     }
 };
 
-// для сравнения ключей
+// to compare two keys 
 int compare(Group g1, Group g2) {
     if (g1.degree == N || g2.degree == N) {
         throw "degree is not stated";
@@ -68,7 +68,7 @@ int compare(Group g1, Group g2) {
     return 0;
 }
 
-// узел дерева
+// AVLTree's node 
 struct Node {
 public:
     Group key;
@@ -84,7 +84,7 @@ public:
     }
 };
 
-// чтобы понятно отображались ключи 
+// to be able to print keys 
 std::ostream& operator << (std::ostream& os, const Node& node) {
     char degree = 'N';
     
@@ -106,7 +106,7 @@ std::ostream& operator << (std::ostream& os, const Node& node) {
     return os << degree + number;
 }
 
-// само дерево
+// the avl tree itself 
 class AVLTree {
 private:
     Node* root;
@@ -145,28 +145,28 @@ private:
         return y;
     }
 
-    // рекурсивный метод для вставки в дерево
-    // в конечном счете возвращает корень дерева с обновленными вершинами
+    // recursively inserts new key to the tree
+    // returns root of updated (with new node) tree
     Node* insert(Node* node, Group key) {
-        // если дерево пустое просто добавляем элемент в качестве корня 
+        // if tree is empty just set new element as root of the tree
         if (node == nullptr) 
             return new Node(key);
 
-        // иначе необходимо найти куда его нужно вставить в дерево
+        // else we have to find place to insert new element 
         int comp = compare(key, node->key);
         if (comp < 0)
-            // если добавляемый элемент меньше текущего узла - переходим в левое поддерево
+            // if new element is less than current node then recursively insert in the left subtree
             node->left = insert(node->left, key);
         else if (comp > 0)
-            // если добавляемый элемент больше текущего узла - переходим в правое поддерево
+            // if new element is greater than current node then recursively insert in the right subtree
             node->right = insert(node->right, key);
         else
             return node;
 
-        // после добавление, у вышестоящих вершин высота увеличивается на один
+        // after inserting all the nodes above the new one increase their height by 1
         node->height = 1 + max(getHeight(node->left), getHeight(node->right));
 
-        // необходимо выполнить балансировку дерева 
+        // now we have to rebalance our tree
         int balance = getBalance(node);
 
         if (balance > 1 && compare(key, node->left->key) < 0)
@@ -188,7 +188,7 @@ private:
         return node;
     }
 
-    // для нахождения минимального элемента 
+    // for finding minimal element 
     Node* minValueNode(Node* node) {
         Node* current = node;
 
