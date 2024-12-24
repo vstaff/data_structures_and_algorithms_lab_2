@@ -46,6 +46,11 @@ Node::Node(Group p_key) {
     height = 1;
 }
 
+// add row index where we've found duplicate
+void Node::addDuplicate(int rowIndex) {
+    duplicates.add(rowIndex);
+}
+
 std::ostream& operator << (std::ostream& os, const Node& node) {
     char degree = 'N';
 
@@ -120,6 +125,8 @@ Node* AVLTree::insert(Node* node, Group key) {
         // if new element is greater than current node then recursively insert in the right subtree
         node->right = insert(node->right, key);
     else
+        // if we key is a complete copy of the current node 
+
         return node;
 
     // after inserting all the nodes above the new one increase their height by 1

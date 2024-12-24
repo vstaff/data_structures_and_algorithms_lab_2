@@ -4,6 +4,8 @@
 #include <iostream>
 #include <string>
 
+#include "dll.h"
+
 enum Degree {
     B, // bakalavriat
     M, // magistratura
@@ -29,6 +31,12 @@ public:
     Node* left;
     Node* right;
     int height;
+
+    // list of duplicates
+    DLL duplicates;
+
+    // when we encounter a duplicate
+    void addDuplicate(int rowIndex);
 
     Node(Group p_key);
 };
