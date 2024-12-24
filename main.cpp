@@ -14,8 +14,11 @@ int main() {
     }
 
     std::string line;
+    int rowIndex = 0;
 
     while (std::getline(file, line)) {
+        ++rowIndex;
+
         if (!isKeyValid(line)) {
             continue;
         }
@@ -44,10 +47,11 @@ int main() {
         }
 
         Group key(degree, number);
-        std::cout << "has created " << degree  << number[0] << number[1] << number[2] << number[3] << std::endl;
-        tree.insert(key);
+        tree.insert(key, rowIndex);
     }
 
     tree.traverse();
+
+    tree.print();
     file.close();
 }

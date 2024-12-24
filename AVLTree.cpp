@@ -72,7 +72,23 @@ std::ostream& operator << (std::ostream& os, const Node& node) {
         number += std::to_string(node.key.number[i]);
     }
 
-    return os << degree + number;
+    // for printing duplicates
+    std::string duplicates = "";
+    if (node.duplicates.head != nullptr) {
+        duplicates += "(";
+
+        DLLNode* currentNode = node.duplicates.head;
+
+        while (currentNode != nullptr) {
+            duplicates += std::to_string(currentNode->data);
+            duplicates += ", ";
+            currentNode = currentNode->next;
+        }
+
+        duplicates = duplicates.substr(0, duplicates.size() - 2) + ")";
+    }
+
+    return os << degree + number + duplicates;
 }
 
 // private methods
@@ -111,7 +127,7 @@ Node* AVLTree::rotateLeft(Node* x) {
     return y;
 }
 
-Node* AVLTree::insert(Node* node, Group key) {
+Node* AVLTree::insert(Node* node, Group key, int rowIndex) {
     // if tree is empty just set new element as root of the tree
     if (node == nullptr)
         return new Node(key);
@@ -120,13 +136,13 @@ Node* AVLTree::insert(Node* node, Group key) {
     int comp = compare(key, node->key);
     if (comp < 0)
         // if new element is less than current node then recursively insert in the left subtree
-        node->left = insert(node->left, key);
+        node->left = insert(node->left, key, rowIndex);
     else if (comp > 0)
         // if new element is greater than current node then recursively insert in the right subtree
-        node->right = insert(node->right, key);
+        node->right = insert(node->right, key, rowIndex);
     else
         // if we key is a complete copy of the current node 
-
+        node->addDuplicate(rowIndex);
         return node;
 
     // after inserting all the nodes above the new one increase their height by 1
@@ -218,11 +234,11 @@ Node* AVLTree::deleteNode(Node* root, Group key) {
     return root;
 }
 
-void AVLTree::inOrder(Node* root) {
+void AVLTree::RNL(Node* root) {
     if (root != nullptr) {
-        inOrder(root->right);
+        RNL(root->right);
         std::cout << *root << std::endl;
-        inOrder(root->left);
+        RNL(root->left);
     }
 }
 
@@ -234,14 +250,32 @@ void AVLTree::freeMemory(Node* root) {
     }
 }
 
+//print tree
+void AVLTree::print(Node* node, std::string indent, bool isRight) {
+    if (node != nullptr) {
+        std::cout << indent;
+        if (isRight) {
+            std::cout << "R----";
+            indent += "     ";
+        }
+        else {
+            std::cout << "L----";
+            indent += "|    ";
+        }
+        std::cout << *node << std::endl;
+        print(node->left, indent, false);
+        print(node->right, indent, true);
+    }
+}
+
 // public methods
 
 AVLTree::AVLTree() {
     root = nullptr;
 }
 
-void AVLTree::insert(Group key) {
-    root = insert(root, key);
+void AVLTree::insert(Group key, int rowIndex) {
+    root = insert(root, key, rowIndex);
 }
 
 void AVLTree::deleteKey(Group key) {
@@ -263,7 +297,11 @@ void AVLTree::search(Group key) {
 }
 
 void AVLTree::traverse() {
-    inOrder(root);
+    RNL(root);
+}
+
+void AVLTree::print() {
+    print(root, "", true);
 }
 
 AVLTree::~AVLTree() {

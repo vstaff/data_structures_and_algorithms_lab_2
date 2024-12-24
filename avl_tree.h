@@ -55,26 +55,31 @@ private:
 
     Node* rotateLeft(Node* x);
 
-    Node* insert(Node* node, Group key);
+    Node* insert(Node* node, Group key, int rowIndex);
 
     Node* minValueNode(Node* node);
 
     Node* deleteNode(Node* root, Group key);
 
-    void inOrder(Node* root);
+    void RNL(Node* root);
 
     void freeMemory(Node* root);
+
+    // print tree
+    void print(Node* node, std::string indent, bool isRight);
 
 public:
     AVLTree();
 
-    void insert(Group key);
+    void insert(Group key, int rowIndex);
 
     void deleteKey(Group key);
 
     void search(Group key);
 
     void traverse();
+
+    void print();
 
     ~AVLTree();
 };
