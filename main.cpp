@@ -5,7 +5,7 @@
 
 
 int main() {
-    std::ifstream file("./input.txt");
+    std::ifstream file("./input1.txt");
     AVLTree tree;
 
     if (!file.is_open()) {

@@ -132,7 +132,7 @@
     <ClCompile Include="main.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <Text Include="input.txt" />
+    <Text Include="input1.txt" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="avl_tree.h" />

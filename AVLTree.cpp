@@ -52,10 +52,13 @@ std::ostream& operator << (std::ostream& os, const Node& node) {
     switch (node.key.degree) {
     case B:
         degree = 'B';
+        break;
     case M:
         degree = 'M';
+        break;
     case S:
         degree = 'S';
+        break;
     }
 
     std::string number = "";
@@ -211,7 +214,7 @@ Node* AVLTree::deleteNode(Node* root, Group key) {
 void AVLTree::inOrder(Node* root) {
     if (root != nullptr) {
         inOrder(root->right);
-        std::cout << root->key << std::endl;
+        std::cout << *root << std::endl;
         inOrder(root->left);
     }
 }
