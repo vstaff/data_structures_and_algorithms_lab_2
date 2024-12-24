@@ -2,6 +2,7 @@
 #include <fstream>
 
 #include "avl_tree.h"
+#include "dll.h"
 
 Group getKey(std::string line) {
     Degree degree = N;
@@ -54,9 +55,16 @@ int main() {
         Group key = getKey(line);
         tree.insert(key, rowIndex);
     }
+    file.close();
 
     tree.traverse();
-
     tree.print();
-    file.close();
+
+    Degree targetDegree = S;
+    unsigned int targetNumber[4] = { 3, 8, 2, 0, };
+    Group target(targetDegree, targetNumber);
+    
+    tree.deleteKey(target);
+    tree.traverse();
+    tree.print();
 }
