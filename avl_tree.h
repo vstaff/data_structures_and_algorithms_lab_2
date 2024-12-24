@@ -1,0 +1,76 @@
+#ifndef AVL_TREE_H
+#define AVL_TREE_H
+
+#include <iostream>
+#include <string>
+
+enum Degree {
+    B, // bakalavriat
+    M, // magistratura
+    S, // specialitet
+    N, // not stated 
+};
+
+struct Group {
+public:
+    Degree degree;
+    unsigned int number[4];
+
+    Group();
+
+    Group(Degree p_degree, unsigned int p_number[4]);
+};
+
+int compare(Group g1, Group g2);
+
+struct Node {
+public:
+    Group key;
+    Node* left;
+    Node* right;
+    int height;
+
+    Node(Group p_key);
+};
+
+std::ostream& operator << (std::ostream& os, const Node& node);
+
+class AVLTree {
+private:
+    Node* root;
+
+    int getHeight(Node* node);
+
+    int getBalance(Node* node);
+
+    Node* rotateRight(Node* y);
+
+    Node* rotateLeft(Node* x);
+
+    Node* insert(Node* node, Group key);
+
+    Node* minValueNode(Node* node);
+
+    Node* deleteNode(Node* root, Group key);
+
+    void inOrder(Node* root);
+
+    void freeMemory(Node* root);
+
+public:
+    AVLTree();
+
+    void insert(Group key);
+
+    void deleteKey(Group key);
+
+    void search(Group key);
+
+    void traverse();
+
+    ~AVLTree();
+};
+
+bool isKeyValid(std::string key);
+
+#endif
