@@ -66,6 +66,8 @@ private:
     void freeMemory(Node* root);
 
     // print tree
+    
+
     void print(Node* node, std::string indent, bool isRight);
 
 public:
@@ -78,6 +80,11 @@ public:
     void search(Group key);
 
     void traverse();
+
+    // to output in file 
+    void RNLInFile(std::ofstream& outputFile, Node* root);
+
+    void traverseInFile(std::ofstream& outputFile);
 
     void print();
 

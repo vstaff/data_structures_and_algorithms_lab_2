@@ -133,6 +133,7 @@
   </ItemGroup>
   <ItemGroup>
     <Text Include="input1.txt" />
+    <Text Include="output.txt" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="avl_tree.h" />

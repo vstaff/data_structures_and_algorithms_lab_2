@@ -1,5 +1,6 @@
 #include <iostream>
 #include <regex>
+#include <fstream>
 #include "avl_tree.h"
 
 Group::Group() {
@@ -300,6 +301,22 @@ void AVLTree::search(Group key) {
 void AVLTree::traverse() {
     RNL(root);
 }
+
+
+
+// output in file
+void AVLTree::RNLInFile(std::ofstream& outputFile, Node* root) {
+    if (root != nullptr) {
+        RNLInFile(outputFile, root->right);
+        outputFile << *root << std::endl;
+        RNLInFile(outputFile, root->left);
+    }
+}
+
+void AVLTree::traverseInFile(std::ofstream& outputFile) {
+    RNLInFile(outputFile, root);
+}
+
 
 void AVLTree::print() {
     print(root, "", true);

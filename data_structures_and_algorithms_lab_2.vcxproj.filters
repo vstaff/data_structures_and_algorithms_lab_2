@@ -29,6 +29,7 @@
     <Text Include="input1.txt">
       <Filter>Исходные файлы</Filter>
     </Text>
+    <Text Include="output.txt" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="avl_tree.h">

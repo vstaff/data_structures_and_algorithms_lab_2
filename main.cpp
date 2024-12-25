@@ -34,37 +34,61 @@ Group getKey(std::string line) {
 
 
 int main() {
-    std::ifstream file("./input1.txt");
+    std::ifstream inputFile("./input1.txt");
     AVLTree tree;
 
-    if (!file.is_open()) {
+    if (!inputFile.is_open()) {
         std::cout << "there is no file with such name\n";
         return 0;
     }
-
+    
     std::string line;
     int rowIndex = 0;
 
-    while (std::getline(file, line)) {
+    std::cout << "inserting keys in the tree\n";
+
+    while (std::getline(inputFile, line)) {
         ++rowIndex;
 
         if (!isKeyValid(line)) {
+            std::cout << "incorrect key on line: " << rowIndex << std::endl;
             continue;
         }
 
         Group key = getKey(line);
         tree.insert(key, rowIndex);
     }
-    file.close();
+    inputFile.close();
 
+    std::cout << "from right to left traverse of the tree: " << std::endl;
     tree.traverse();
+    std::cout << "that's what tree looks like: " << std::endl;
     tree.print();
+
 
     Degree targetDegree = S;
     unsigned int targetNumber[4] = { 3, 8, 2, 0, };
     Group target(targetDegree, targetNumber);
-    
+    Node targetNode(target);
+
+    std::cout << "now let's delete node: " << targetNode << std::endl;
+
     tree.deleteKey(target);
+
+    std::cout << "from right to left traverse of the tree: " << std::endl;
     tree.traverse();
+
+    std::cout << "that's what tree looks like: " << std::endl;
     tree.print();
+
+    std::cout << "print tree in the output file\n";
+    std::ofstream outputFile;
+    outputFile.open("./output.txt");
+
+    if (!outputFile.is_open()) {
+        std::cout << "there is no file with such name\n";
+        return 0;
+    }
+
+    tree.traverseInFile(outputFile);
 }
