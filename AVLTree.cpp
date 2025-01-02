@@ -45,6 +45,7 @@ Node::Node(Group p_key) {
     left = nullptr;
     right = nullptr;
     height = 1;
+    balance = 0;
 }
 
 // add row index where we've found duplicate
@@ -302,6 +303,123 @@ void AVLTree::traverse() {
     RNL(root);
 }
 
+// insertion by virt 
+void AVLTree::searchAndInsert(Group x, Node* &p, bool &h, int rowIndex) {
+    Node* p1;
+    Node* p2;
+
+    if (p == nullptr) {
+        p = new Node(x);
+        h = true;
+    }
+
+    else if (compare(p->key, x) == 1) {
+        searchAndInsert(x, p->left, h, rowIndex);
+
+        if (h) {
+            if (p->balance == 1) {
+                p->balance = 0;
+                h = false;
+            }
+
+            else if (p->balance == 0) {
+                p->balance = -1;
+            }
+
+            else {
+                p1 = p->left;
+
+                if (p1->balance == -1) {
+                    p->left = p1->right;
+                    p1->right = p;
+                    p->balance = 0;
+                    p = p1;
+                }
+
+                else {
+                    p2 = p1->right;
+                    p1->right = p2->left;
+                    p2->left = p1;
+                    p->left = p2->right;
+                    p2->right = p;
+
+                    if (p2->balance == -1) {
+                        p->balance = 1;
+                    }
+                    else {
+                        p->balance = 0;
+                    }
+
+                    if (p2->balance == 1) {
+                        p1->balance = -1;
+                    }
+                    else {
+                        p1->balance = 0;
+                    }
+                    p = p2;
+                }
+                p->balance = 0;
+                h = false;
+            }
+        }
+    }
+
+    else if (compare(p->key, x) == -1) {
+        searchAndInsert(x, p->right, h, rowIndex);
+        if (h) {
+            if (p->balance == -1) {
+                p->balance = 0;
+                h = false;
+            }
+            else if (p->balance == 0) {
+                p->balance = 1;
+            }
+            else {
+                p1 = p->right;
+
+                if (p1->balance == 1) {
+                    p->right = p1->left;
+                    p1->left = p;
+                    p->balance = 0;
+                    p = p1;
+                }
+
+                else {
+                    p2 = p1->left;
+                    p1->left = p2->right;
+                    p2->right = p1;
+                    p->right = p2->left;
+                    p2->left = p;
+
+                    if (p2->balance == 1) {
+                        p->balance = -1;
+                    }
+                    else {
+                        p->balance = 0;
+                    }
+
+                    if (p2->balance == -1) {
+                        p1->balance = 1;
+                    }
+                    else {
+                        p1->balance = 0;
+                    }
+                    p = p2;
+                }
+                p->balance = 0;
+                h = false;
+            }
+        }   
+    }
+    else {
+        p->addDuplicate(rowIndex);
+    }
+}
+
+void AVLTree::searchAndInsert(Group key, int rowIndex) {
+    bool hasIncreased = false;
+    searchAndInsert(key, root, hasIncreased, rowIndex);
+}
 
 
 // output in file

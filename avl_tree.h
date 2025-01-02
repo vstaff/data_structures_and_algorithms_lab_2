@@ -32,6 +32,9 @@ public:
     Node* right;
     int height;
 
+    // constantly stored balance (height(rightSubtree) - height(leftSubtree))
+    int balance;
+
     // list of duplicates
     DLL duplicates;
 
@@ -70,6 +73,9 @@ private:
 
     void print(Node* node, std::string indent, bool isRight);
 
+    // insertion by virt
+    void searchAndInsert(Group key, Node* &node, bool &subtreeIncreased, int rowIndex);
+
 public:
     AVLTree();
 
@@ -87,6 +93,9 @@ public:
     void traverseInFile(std::ofstream& outputFile);
 
     void print();
+
+    // insertion by virt
+    void searchAndInsert(Group key, int rowIndex);
 
     ~AVLTree();
 };

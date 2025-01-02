@@ -51,16 +51,22 @@ int main() {
         ++rowIndex;
 
         if (!isKeyValid(line)) {
-            std::cout << "incorrect key on line: " << rowIndex << std::endl;
+            std::cout << "incorrect key on line: " << rowIndex << std::endl << std::endl;
             continue;
         }
 
         Group key = getKey(line);
-        tree.insert(key, rowIndex);
+        Node node(key);
+        //tree.insert(key, rowIndex);
+        
+        std::cout << "inserting: " << node << std::endl;
+        tree.searchAndInsert(key, rowIndex);
+        tree.print();
+        std::cout << std::endl;
     }
     inputFile.close();
 
-    std::cout << "from right to left traverse of the tree: " << std::endl;
+    /*std::cout << "from right to left traverse of the tree: " << std::endl;
     tree.traverse();
     std::cout << "that's what tree looks like: " << std::endl;
     tree.print();
@@ -90,5 +96,5 @@ int main() {
         return 0;
     }
 
-    tree.traverseInFile(outputFile);
+    tree.traverseInFile(outputFile);*/
 }
