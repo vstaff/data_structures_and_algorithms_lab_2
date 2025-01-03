@@ -1,6 +1,5 @@
 #include <iostream>
 #include <fstream>
-
 #include "avl_tree.h"
 #include "dll.h"
 
@@ -57,7 +56,6 @@ int main() {
 
         Group key = getKey(line);
         Node node(key);
-        //tree.insert(key, rowIndex);
         
         std::cout << "inserting: " << node << std::endl;
         tree.searchAndInsert(key, rowIndex);
@@ -85,7 +83,7 @@ int main() {
     std::cout << "that's what tree looks like: " << std::endl;
     tree.print();
 
-    /*std::cout << "print tree in the output file\n";
+    std::cout << "print tree in the output file\n";
     std::ofstream outputFile;
     outputFile.open("./output.txt");
 
@@ -94,5 +92,6 @@ int main() {
         return 0;
     }
 
-    tree.traverseInFile(outputFile);*/
+    tree.traverseInFile(outputFile);
+    tree.printInFile(outputFile);
 }
