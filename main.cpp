@@ -66,12 +66,10 @@ int main() {
     }
     inputFile.close();
 
-    /*std::cout << "from right to left traverse of the tree: " << std::endl;
+    std::cout << "right to left traverse of the tree: " << std::endl;
     tree.traverse();
-    std::cout << "that's what tree looks like: " << std::endl;
-    tree.print();
 
-
+    // here is demonstration of deleting node by its key
     Degree targetDegree = S;
     unsigned int targetNumber[4] = { 3, 8, 2, 0, };
     Group target(targetDegree, targetNumber);
@@ -79,7 +77,7 @@ int main() {
 
     std::cout << "now let's delete node: " << targetNode << std::endl;
 
-    tree.deleteKey(target);
+    tree.virtDelete(target);
 
     std::cout << "from right to left traverse of the tree: " << std::endl;
     tree.traverse();
@@ -87,7 +85,7 @@ int main() {
     std::cout << "that's what tree looks like: " << std::endl;
     tree.print();
 
-    std::cout << "print tree in the output file\n";
+    /*std::cout << "print tree in the output file\n";
     std::ofstream outputFile;
     outputFile.open("./output.txt");
 

@@ -13,6 +13,7 @@ enum Degree {
     N, // not stated 
 };
 
+// structure representing key of avl tree nodes
 struct Group {
 public:
     Degree degree;
@@ -73,8 +74,18 @@ private:
 
     void print(Node* node, std::string indent, bool isRight);
 
-    // insertion by virt
+    // insertion by Virt
     void searchAndInsert(Group key, Node* &node, bool &subtreeIncreased, int rowIndex);
+
+    // deletion by Virt
+    void balanceL(Node*& p, bool& h);
+
+    void balanceR(Node*& p, bool& h);
+
+    // deletion itself
+    void virtDelete(Group x, Node*& p, bool& h);
+
+    void virtDel(Node*& r, bool& h, Node*& q);
 
 public:
     AVLTree();
@@ -96,6 +107,12 @@ public:
 
     // insertion by virt
     void searchAndInsert(Group key, int rowIndex);
+
+    // deletion by Virt (public)
+    void virtDelete(Group x) {
+        bool h = false;
+        virtDelete(x, root, h);
+    }
 
     ~AVLTree();
 };
