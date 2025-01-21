@@ -55,7 +55,7 @@ int main() {
         }
 
         Group key = getKey(line);
-        Node node(key);
+        Node node(key, rowIndex);
         
         std::cout << "inserting: " << node << std::endl;
         tree.searchAndInsert(key, rowIndex);
@@ -67,15 +67,18 @@ int main() {
     std::cout << "right to left traverse of the tree: " << std::endl;
     tree.traverse();
 
-    // here is demonstration of deleting node by its key
+    //// here is demonstration of deleting node by its key
     Degree targetDegree = S;
     unsigned int targetNumber[4] = { 3, 8, 2, 0, };
     Group target(targetDegree, targetNumber);
-    Node targetNode(target);
+    Node targetNode(target, 1);
 
     std::cout << "now let's delete node: " << targetNode << std::endl;
 
-    tree.virtDelete(target);
+    tree.virtDelete(target, 1);
+    tree.virtDelete(target, 9);
+    tree.virtDelete(target, 100);
+    tree.virtDelete(target, 13);
 
     std::cout << "from right to left traverse of the tree: " << std::endl;
     tree.traverse();
@@ -94,4 +97,19 @@ int main() {
 
     tree.traverseInFile(outputFile);
     tree.printInFile(outputFile);
+
+    //// sandbox 
+    //AVLTree tree2;
+    //Degree degree = M;
+    //unsigned int number[5] = {4, 5, 1, 2};
+    //Group key(degree, number);
+
+    //tree2.virtDelete(key);
+
+    //std::cout << "here is tree2: " << std::endl;
+    //tree2.traverse();
+    //tree2.print();
+
+    //std::cout << "result of the search: " << std::endl;
+    //tree.search(key);
 }

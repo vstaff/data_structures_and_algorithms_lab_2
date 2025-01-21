@@ -13,10 +13,14 @@ public:
 class DLL {
 public:
 	DLLNode* head;
+	unsigned int size;
 
 	DLL();
 
 	void add(int value);
+
+	// recently added 
+	void deleteTarget(unsigned int target);
 
 	void deleteAfter(int target);
 

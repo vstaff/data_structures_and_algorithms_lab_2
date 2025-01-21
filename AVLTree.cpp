@@ -40,12 +40,14 @@ int compare(Group g1, Group g2) {
     return 0;
 }
 
-Node::Node(Group p_key) {
+Node::Node(Group p_key, unsigned int rowIndex) {
     key = p_key;
     left = nullptr;
     right = nullptr;
     height = 1;
     balance = 0;
+
+    duplicates.add(rowIndex);
 }
 
 // add row index where we've found duplicate
@@ -133,7 +135,7 @@ void AVLTree::searchAndInsert(Group x, Node*& p, bool& h, int rowIndex) {
     Node* p2;
 
     if (p == nullptr) {
-        p = new Node(x);
+        p = new Node(x, rowIndex);
         h = true;
     }
 
@@ -153,14 +155,22 @@ void AVLTree::searchAndInsert(Group x, Node*& p, bool& h, int rowIndex) {
             else {
                 p1 = p->left;
 
+                // single r rotation
                 if (p1->balance == -1) {
+                    std::cout << "right rotation" << std::endl;
+                    print();
+                    
                     p->left = p1->right;
                     p1->right = p;
                     p->balance = 0;
                     p = p1;
                 }
 
+                // left-right rotation
                 else {
+                    std::cout << "left right rotation" << std::endl;
+                    print();
+
                     p2 = p1->right;
                     p1->right = p2->left;
                     p2->left = p1;
@@ -201,14 +211,22 @@ void AVLTree::searchAndInsert(Group x, Node*& p, bool& h, int rowIndex) {
             else {
                 p1 = p->right;
 
+                // single l rotation
                 if (p1->balance == 1) {
+                    std::cout << "left rotation" << std::endl;
+                    print();
+
                     p->right = p1->left;
                     p1->left = p;
                     p->balance = 0;
                     p = p1;
                 }
 
+                // right-left rotation
                 else {
+                    std::cout << "right-left rotation" << std::endl;
+                    print();
+
                     p2 = p1->left;
                     p1->left = p2->right;
                     p2->right = p1;
@@ -350,7 +368,7 @@ void AVLTree::balanceR(Node*& p, bool& h) {
 }
 
 // deletion itself
-void AVLTree::virtDelete(Group x, Node*& p, bool& h) {
+void AVLTree::virtDelete(Group x, Node*& p, bool& h, unsigned int rowIndex) {
     Node* q;
 
     if (p == nullptr) {
@@ -358,7 +376,8 @@ void AVLTree::virtDelete(Group x, Node*& p, bool& h) {
     }
 
     else if (compare(p->key, x) == 1) {
-        virtDelete(x, p->left, h);
+
+        virtDelete(x, p->left, h, rowIndex);
 
         if (h) {
             balanceL(p, h);
@@ -366,14 +385,14 @@ void AVLTree::virtDelete(Group x, Node*& p, bool& h) {
     }
 
     else if (compare(p->key, x) == -1) {
-        virtDelete(x, p->right, h);
+        virtDelete(x, p->right, h, rowIndex);
 
         if (h) {
             balanceR(p, h);
         }
     }
 
-    else {
+    else if (p->duplicates.includes(rowIndex)) {
         q = p;
 
         if (q->right == nullptr) {
@@ -387,7 +406,7 @@ void AVLTree::virtDelete(Group x, Node*& p, bool& h) {
         }
 
         else {
-            virtDel(q->left, h, q);
+            virtDel(q->left, h, q, rowIndex);
 
             if (h) {
                 balanceL(p, h);
@@ -396,21 +415,28 @@ void AVLTree::virtDelete(Group x, Node*& p, bool& h) {
     }
 }
 
-void AVLTree::virtDel(Node*& r, bool& h, Node*& q) {
+void AVLTree::virtDel(Node*& r, bool& h, Node*& q, unsigned int rowIndex) {
     if (r->right != nullptr) {
-        virtDel(r->right, h, q);
+        virtDel(r->right, h, q, rowIndex);
 
         if (h) {
             balanceR(r, h);
         }
     }
 
+    // here are changes
     else {
-        q->key = r->key;
-        q->duplicates = r->duplicates;
-        q = r;
-        r = r->left;
-        h = true;
+        if (q->duplicates.size > 1) {
+            q->duplicates.deleteTarget(rowIndex);
+        }
+
+        else {
+            q->key = r->key;
+            q->duplicates = r->duplicates;
+            q = r;
+            r = r->left;
+            h = true;
+        }
     }
 }
 
@@ -427,7 +453,7 @@ void AVLTree::search(Group key) {
         int comp = compare(key, current->key);
         if (comp == 0) {
             std::cout << "Found: ";
-            std::cout << current;
+            std::cout << *current;
             return;
         }
         current = (comp < 0) ? current->left : current->right;

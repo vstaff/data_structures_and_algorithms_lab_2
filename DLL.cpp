@@ -9,9 +9,11 @@ DLLNode::DLLNode(int p_data) {
 
 DLL::DLL() {
 	head = nullptr;
+	size = 0;
 }
 
 void DLL::add(int value) {
+	size++;
 	DLLNode* newNode = new DLLNode(value);
 
 	if (head == nullptr) {
@@ -61,7 +63,44 @@ void DLL::add(int value) {
 	}
 }
 
+// recently added 
+void DLL::deleteTarget(unsigned int target) {
+	if (head->data == target) {
+		size--;
+		DLLNode* newHead = head->next;
+		delete head;
+		head = newHead;
+
+		if (head != nullptr) {
+			head->prev = nullptr;
+		}
+		return;
+	}
+
+	DLLNode* currentNode = head->next;
+
+	while (currentNode != nullptr) {
+		if (currentNode->data == target) {
+			DLLNode* prev = currentNode->prev;
+			DLLNode* next = currentNode->next;
+
+			prev->next = next;
+
+			if (next != nullptr) {
+				next->prev = prev;
+			}
+
+			delete currentNode;
+			size--;
+			return;
+		}
+
+		currentNode = currentNode->next;
+	}
+}
+
 void DLL::deleteAfter(int target) {
+
 	if (head == nullptr) {
 		return;
 	}
@@ -70,6 +109,8 @@ void DLL::deleteAfter(int target) {
 
 	while (currentNode->next != nullptr) {
 		if (currentNode->data == target) {
+			size--;
+
 			if (currentNode->next->next == nullptr) {
 				delete currentNode->next;
 				currentNode->next = nullptr;
@@ -90,6 +131,7 @@ void DLL::deleteAfter(int target) {
 
 void DLL::deleteAll(int target) {
 	while (head != nullptr && head->data == target) {
+		size--;
 		DLLNode* newHead = head->next;
 		delete head;
 		head = newHead;
@@ -107,6 +149,7 @@ void DLL::deleteAll(int target) {
 
 	while (currentNode != nullptr) {
 		if (currentNode->data == target) {
+			size--;
 			DLLNode* newCurrentNode = currentNode->next;
 
 			currentNode->prev->next = currentNode->next;
@@ -141,6 +184,7 @@ void DLL::clear() {
 	}
 
 	head = nullptr;
+	size = 0;
 }
 
 bool DLL::includes(int target) {

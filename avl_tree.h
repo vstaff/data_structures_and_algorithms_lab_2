@@ -42,7 +42,7 @@ public:
     // when we encounter a duplicate
     void addDuplicate(int rowIndex);
 
-    Node(Group p_key);
+    Node(Group p_key, unsigned int rowIndex);
 };
 
 std::ostream& operator << (std::ostream& os, const Node& node);
@@ -67,9 +67,9 @@ private:
     void balanceR(Node*& p, bool& h);
 
     // deletion itself
-    void virtDelete(Group x, Node*& p, bool& h);
+    void virtDelete(Group x, Node*& p, bool& h, unsigned int rowIndex);
 
-    void virtDel(Node*& r, bool& h, Node*& q);
+    void virtDel(Node*& r, bool& h, Node*& q, unsigned int rowIndex);
 
     void RNLInFile(std::ofstream& outputFile, Node* root);
 
@@ -93,9 +93,9 @@ public:
     void searchAndInsert(Group key, int rowIndex);
 
     // deletion by Virt (public)
-    void virtDelete(Group x) {
+    void virtDelete(Group x, unsigned int rowIndex) {
         bool h = false;
-        virtDelete(x, root, h);
+        virtDelete(x, root, h, rowIndex);
     }
 
     ~AVLTree();
